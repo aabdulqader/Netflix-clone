@@ -1,24 +1,55 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect } from "react";
+import FooterContainer from "./Containers/FooterContainer";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
+import { useStateValue } from "./ContextApi/StateProvider";
+import { auth } from "./firebase";
+import Home from "./pages/Home";
+import Signup from "./pages/Signup";
+import Signin from "./pages/Signin";
+import Browse from "./pages/Browse";
 
 function App() {
+  const [{ user }, dispatch] = useStateValue();
+
+  // Create a listener to track who is singin/signup
+  useEffect(() => {
+    // listener
+    auth.onAuthStateChanged((user) => {
+      if (user) {
+        // the user just logged in / the was logged in
+        dispatch({
+          type: "SET_USER",
+          user: user,
+        });
+      } else {
+        // the user is logged out
+        dispatch({
+          type: "SET_USER",
+          user: null,
+        });
+      }
+    });
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Router>
+      <Switch>
+        <Route exact path="/">
+          <Home />
+        </Route>
+        <Route path="/signup">
+          <Signup />
+        </Route>
+        <Route path="/signin">
+          <Signin />
+        </Route>
+        <Route path="/browse">
+          {" "}
+          <Browse />{" "}
+        </Route>
+      </Switch>
+      <FooterContainer />
+    </Router>
   );
 }
 
